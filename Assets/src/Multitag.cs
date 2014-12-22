@@ -4,22 +4,36 @@ using UnityEngine;
 using System.Collections;
 
 public class Multitag : MonoBehaviour {
-
-	public List<string> TagsList;
 	
-	public static IEnumerable<GameObject> GetGameObjectsWithTag(string tag) {
-		return (
-				from obj in FindObjectsOfType<Multitag>() 
-				where obj.TagsList.Contains(tag) 
-				select obj.gameObject
-			).ToList(); 
-	}
+	private static List<Multitag> taggers = null;
+	
+	// Used only for inspector convenience, runtime interactions should be directed to the TagsSet HashSet
+	[SerializeField]
+	private List<string> Tags;
 
-	public static IEnumerable<GameObject> GetGameObjectsWithTags(IEnumerable<string> tags) {
-		return (
-				from obj in FindObjectsOfType<Multitag>() 
-				where tags.All(x => obj.TagsList.Contains(x)) 
-				select obj.gameObject
-			).ToList();
+	// Actual tags storage, since it'll be searched a lot
+	public HashSet<string> TagsSet;
+	
+	void Awake() {
+		if (taggers == null) {
+			taggers = new List<Multitag>();
+		}
+		
+		taggers.Add(this);
+		TagsSet = new HashSet<string>(Tags);
+	}
+	
+	public static IEnumerable<GameObject> FindGameObjectsWithTag(string tag) {
+		if (taggers == null) return null;
+	
+		return taggers.Where(x => x.TagsSet.Contains(tag)).Select(x => x.gameObject);
+	}
+	
+	public static IEnumerable<GameObject> FindGameObjectsWithTags(IEnumerable<string> tags, bool loose = false) {
+		if (taggers == null) return null;
+		
+		return taggers
+			.Where(x => loose ? x.TagsSet.Intersect(tags).Any() : false)
+			.Select(x => x.gameObject);
 	}
 }
