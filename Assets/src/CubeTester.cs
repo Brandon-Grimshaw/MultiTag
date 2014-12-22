@@ -16,6 +16,9 @@ public class CubeTester : MonoBehaviour {
 	public Text text;
 	
 	public bool testPerformance = false;
+	public bool disjunctive = false;
+	public int randomTagCount = 10000;
+	public float delay = 0.5f;
 
 	private int x = 0, y = 0;
 	
@@ -31,34 +34,42 @@ public class CubeTester : MonoBehaviour {
 		// change cubes
 	}
 	
-	private void test() {
+	private IEnumerator test() {
+		while (this.enabled) {
+			x = UnityEngine.Random.Range(0, 3); 
+			y = UnityEngine.Random.Range(0, 3);
+			var array = new string[] { 'x' + x.ToString(), 'y' + y.ToString() };
 		
-		x = UnityEngine.Random.Range(0, 3); 
-		y = UnityEngine.Random.Range(0, 3);
-		var array = new string[] { 'x' + x.ToString(), 'y' + y.ToString() };
-	
-		Stopwatch stop = Stopwatch.StartNew();
-		
-		var result = Multitag.FindGameObjectsWithTags(array, true).ToList(); // ToList to force execution
-		
-		stop.Stop();
-		print("x: " + array[0] + ", y: " + array[1] + ", search time: " + stop.Elapsed.ToString());
-		
-		foreach (var obj in Cubes) {
-			obj.GetComponent<MeshRenderer>().enabled = false;
-		}
-		
-		foreach (var obj in result) {
-			obj.GetComponent<MeshRenderer>().enabled = true;
+			Stopwatch stop = Stopwatch.StartNew();
+			
+			var result = Multitag.FindGameObjectsWithTags(array, disjunctive).ToList(); // ToList to force execution
+			
+			stop.Stop();
+			
+			var perf = "x: " + array[0] + ", y: " + array[1] + ", search time: " + stop.Elapsed.ToString();
+			print(perf);
+			text.text = perf;
+			
+			foreach (var obj in Cubes) {
+				obj.GetComponent<MeshRenderer>().enabled = false;
+			}
+			
+			foreach (var obj in result) {
+				obj.GetComponent<MeshRenderer>().enabled = true;
+			}
+			
+			yield return new WaitForSeconds(delay);
 		}
 	}
 	
 	void Start() {
 		if (testPerformance) {
 			foreach (var cube in Cubes) {
-				for (int i = 0; i < 100000; i++)
+				for (int i = 0; i < randomTagCount; i++)
 					cube.GetComponent<Multitag>().TagsSet.Add(generateString());
 			}
+			
+			StartCoroutine(test());
 		}
 	}
 	
@@ -73,9 +84,7 @@ public class CubeTester : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		
-		if (testPerformance) test();
-		else interact();
+		if (!testPerformance) interact();
 		
 //		var cubes = Multitag.GetGameObjectsWithTags(new String[] { 'x' + x.ToString(), 'y' + y.ToString() });
 //		foreach (var cube in cubes) {

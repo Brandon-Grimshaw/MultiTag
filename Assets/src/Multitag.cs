@@ -24,16 +24,16 @@ public class Multitag : MonoBehaviour {
 	}
 	
 	public static IEnumerable<GameObject> FindGameObjectsWithTag(string tag) {
-		if (taggers == null) return null;
+		if (taggers == null || tag == null) return null;
 	
 		return taggers.Where(x => x.TagsSet.Contains(tag)).Select(x => x.gameObject);
 	}
 	
 	public static IEnumerable<GameObject> FindGameObjectsWithTags(IEnumerable<string> tags, bool loose = false) {
-		if (taggers == null) return null;
+		if (taggers == null || tags == null) return null;
 		
 		return taggers
-			.Where(x => loose ? x.TagsSet.Intersect(tags).Any() : false)
+			.Where(x => loose ? x.TagsSet.Intersect(tags).Any() : x.TagsSet.Intersect(tags).Count() == tags.Count())
 			.Select(x => x.gameObject);
 	}
 }
