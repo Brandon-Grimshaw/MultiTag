@@ -10,4 +10,4 @@ Add `MultiTag` to objects to be tagged. It exposes a list called `TagsList`, sim
 
 Example
 -------
-The repository contains an interactive example scene that shows basic usage, using the <kbd>0</kbd> and <kbd>1</kbd> keys to interact.
+The repository contains an interactive example scene (note: made in Unity 5, may not work in Unity 4) that shows basic usage, using the <kbd>0</kbd> and <kbd>1</kbd> keys to interact.
